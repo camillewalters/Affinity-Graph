@@ -1,0 +1,192 @@
+// Martina Nobile 20710312
+// Emily Neil 20701863
+// Camille Walters 20716280
+
+#include "affinity_graph.hpp"
+#include <iostream>
+#include <cstdlib>
+
+using namespace std;
+
+affinityGraph::affinityGraph(string* nameConversion, int** graph, int person0, int numPeople0)
+{
+    matrix = graph;
+    names = nameConversion;
+
+    person = person0;
+    numPeople = numPeople0;
+    distances = new int[numPeople0]{INT_MAX};
+}
+    
+    
+
+
+affinityGraph::~affinityGraph()
+{
+    
+}
+
+void affinityGraph::calcPath1()
+{
+
+    if(!names)
+        cout << "no! ";
+    
+
+    int* distances = new int[numPeople-1];
+    bool* visited = new bool[numPeople-1];
+    for (int i = 0; i < 9; i++)
+    {
+        distances[i] = INT_MAX;
+        visited[i]=false;
+    }
+    int minDist = INT_MAX;
+    int cd = 0;
+    int nextPerson = 9;
+    int thisPerson = 9;
+    int distToNode = INT_MAX;
+    
+    for (int a = 0; a < 9; a++)
+    {
+        for (int i = 0; i < 9; i++)
+        {
+                if (matrix[thisPerson][i]!=INT_MAX && !visited[i])
+                {
+                    distToNode = matrix[thisPerson][i] + cd;
+                    if (!visited[i] && cd+matrix[thisPerson][i] < distances[i])
+                        distances[i] = cd+matrix[thisPerson][i];
+                }
+                if ((distToNode < minDist || distances[i] < minDist) && visited[i]==false)
+                {
+                    minDist = distToNode;
+                    nextPerson = i;
+                }
+        }
+        
+        cd = distances[nextPerson];
+        thisPerson = nextPerson;
+        visited[nextPerson] = true;
+        minDist = INT_MAX;
+        distToNode = INT_MAX;
+    }
+    
+    for (int i = 0; i < 9; i++)
+    {
+        cout << names[i] << " : " << distances[i] << endl;
+    }
+}
+
+void affinityGraph::calcPath2()
+{
+	
+	cout <<"How many people are there? \n";
+	int n=0;
+	cin>>n;
+	string* names = new string [n];
+	
+	for (int i=0; i<n; i++){
+		cout<<"Please type a name: \n";
+		string name;
+		cin>>name;
+		names[i]=name;
+	}
+	int** matrix = new int*[n];
+    
+    for (int i = 0; i < n; i++)
+    {
+        matrix[i]= new int[n];
+    }
+    for (int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            matrix[i][j] = INT_MAX;
+        }
+    }
+    for (int i=0; i<n; i++){//filling up the diagonal of 0s
+    	matrix[i][i]=0;
+	}
+
+    for (int i=0; i<n; i++){
+    	for (int j=i+1; j<n; j++){
+    		cout<<"What is the affinity between " << names[i] << " and " << names [j] << "? If there is no affinity, enter -1.\n";
+    		int affinity=0;
+    		cin>>affinity;
+    		if (affinity==-1){
+    			matrix[i][j]=INT_MAX;
+    			matrix[j][i]=INT_MAX;
+			}else{			
+    		matrix[i][j]=affinity;
+    		matrix[j][i]=affinity;
+    	}
+		}
+	}
+	   
+	cout<<"Who would you like to start at?\n";
+	string start;
+	int startLoc=0;
+	bool found=0;
+	do{
+		cin >> start;
+		for (int i=0; i<n; i++){
+			if (names[i]==start){
+				startLoc=i;
+				found=1;
+			}
+		}
+		if (!found)
+			cout<<"Sorry, that person does not exist in the matrix. Please try again\n";
+	}while (!found);
+    
+    int* distances = new int[n];
+    bool* visited = new bool[n];
+    for (int i = 0; i < n; i++)
+    {
+    	if (i==startLoc)
+    		distances[i] = 0;
+    	else
+        	distances[i] = INT_MAX;
+        visited[i]=false;
+    }
+    int minDist = INT_MAX;
+    int cd = 0;
+    int nextPerson = startLoc;
+    int thisPerson = startLoc;
+    int distToNode = INT_MAX;
+    
+    for (int a = 0; a < n; a++)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            if (matrix[thisPerson][i]!=INT_MAX && !visited[i])
+            {
+                distToNode = matrix[thisPerson][i] + cd;
+                if (!visited[i] && cd+matrix[thisPerson][i] < distances[i])
+                    distances[i] = cd+matrix[thisPerson][i];
+                    
+            }
+            if ((distToNode < minDist || distances[i] < minDist) && !visited[i])
+            {
+                minDist = distToNode;
+                nextPerson = i;
+            }
+        }
+        
+        cd = distances[nextPerson];
+        thisPerson = nextPerson;
+        visited[nextPerson] = true;
+        minDist = INT_MAX;
+        distToNode = INT_MAX;
+    }
+ 
+    cout<<"Distances: \n";
+    for (int i = 0; i < n; i++)
+    {
+    	if (i==startLoc)
+    		{}
+        else
+			cout << names[i] << " : " << distances[i] << endl;
+    }
+	
+    return;
+}
